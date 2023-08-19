@@ -27,7 +27,7 @@ func (r yzyrouter) SetupControllers(controllers ...interface{}) {
 	preambles := make(map[string][]preamble)
 	for _, c := range controllers {
 		path := reflect.ValueOf(c).Type().PkgPath()
-		pkg, _ := pkgAst(strings.SplitN(path, "/", 2)[1], r.mode) // without mod dir
+		pkg, _ := pkgAst(strings.SplitN(path, "/", 4)[3], r.mode) // without mod dir
 
 		// We don't want to parse one pkg for different controllers
 		if _, exist := preambles[path]; !exist {

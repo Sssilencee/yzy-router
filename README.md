@@ -21,6 +21,8 @@ import (
 
 func TestSetup(t *testing.T) {
 	app := fiber.New()
+	// ..
+
 	router := yzyrouter.New(app, yzyrouter.Debug)
 	router.SetupControllers(
 		// Basic controller
@@ -31,6 +33,8 @@ func TestSetup(t *testing.T) {
 		admin.AdminController{},
 	)
 	app.Listen(":3000")
+
+	// ..
 }
 
 ```
@@ -77,12 +81,6 @@ const (
 )
 
 type TaskController struct{}
-
-// yzy:[Get:tasksPath]
-func (c TaskController) Tasks(ctx *fiber.Ctx) error {
-	fmt.Println(ctx.OriginalURL())
-	return nil
-}
 
 // yzy:[Get:addTaskPath]
 func (c TaskController) AddTask(ctx *fiber.Ctx) error {

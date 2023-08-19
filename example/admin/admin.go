@@ -1,15 +1,15 @@
 package admin
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 )
 
+const adminPath = "/admin"
+
 type AdminController struct{}
 
-// yzy:[Get:tasksPath]
+// yzy:[Get:adminPath]
 func (c AdminController) Tasks(ctx *fiber.Ctx) error {
-	fmt.Println(ctx.OriginalURL())
+	ctx.SendStatus(fiber.StatusOK)
 	return nil
 }
