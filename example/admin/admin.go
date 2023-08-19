@@ -8,7 +8,7 @@ import (
 
 type AdminController struct{}
 
-// yzyrouter[Get:tasksPath]
+// yzy:[Get:tasksPath]
 func (c AdminController) Tasks(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil

@@ -49,7 +49,7 @@ func (ap astPackage) parsePreambles() []preamble {
 				preamble := fn.Doc.Text()
 				controllerName := fn.Recv.List[0].Type.(*ast.Ident).Name
 
-				if p := strings.Split(preamble, "["); p[0] == "yzyrouter" {
+				if p := strings.Split(preamble, "["); p[0] == "yzy:" {
 					pr := ap.parsePreamble(p[1])
 					pr.fn = fn.Name.String()
 					pr.controllerName = controllerName

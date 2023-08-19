@@ -47,7 +47,7 @@ import (
 
 type IndexController struct{}
 
-// yzyrouter[Get:"/index"]
+// yzy:[Get:"/index"]
 func (c IndexController) Index(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil
@@ -78,25 +78,25 @@ const (
 
 type TaskController struct{}
 
-// yzyrouter[Get:tasksPath]
+// yzy:[Get:tasksPath]
 func (c TaskController) Tasks(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil
 }
 
-// yzyrouter[Get:addTaskPath]
+// yzy:[Get:addTaskPath]
 func (c TaskController) AddTask(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil
 }
 
-// yzyrouter[Get:deleteTaskPath]
+// yzy:[Get:deleteTaskPath]
 func (c TaskController) DeleteTask(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil
 }
 
-// yzyrouter[Get:deleteAllTasksPath]
+// yzy:[Get:deleteAllTasksPath]
 func (c TaskController) DeleteAllTasks(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.OriginalURL())
 	return nil
