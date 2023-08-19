@@ -1,4 +1,4 @@
-module yzyrouter
+module github.com/Sssilencee/yzyrouter
 
 go 1.19
 
