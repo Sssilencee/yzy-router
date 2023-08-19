@@ -47,6 +47,9 @@ func (ap astPackage) parsePreambles() []preamble {
 			if fn, isFn := d.(*ast.FuncDecl); isFn {
 
 				preamble := fn.Doc.Text()
+				if preamble == "" {
+					continue
+				}
 				controllerName := fn.Recv.List[0].Type.(*ast.Ident).Name
 
 				if p := strings.Split(preamble, "["); p[0] == "yzy:" {
