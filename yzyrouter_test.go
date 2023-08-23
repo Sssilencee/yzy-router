@@ -42,10 +42,6 @@ func TestSetup(t *testing.T) {
 		admin.AdminController{},
 	)
 
-	go func() {
-		app.Listen(":3000")
-	}()
-
 	{
 		err := makeReq(app, serverUrl+indexPath)
 		if err != nil {
