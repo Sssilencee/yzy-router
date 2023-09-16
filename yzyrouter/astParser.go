@@ -82,7 +82,7 @@ func (ap astPackage) parsePreamble(pr string) preamble {
 	}
 	return preamble{
 		route:  route,
-		method: params[0], // method name before `:`
+		method: strings.Title(strings.ToLower(params[0])), // method name before `:`
 	}
 }
 
