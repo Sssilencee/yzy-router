@@ -4,12 +4,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const adminPath = "/admin"
+const (
+	adminPath   = "/admin"
+	profilePath = adminPath + "/profile"
+)
 
+// yzy:[@pong]
 type AdminController struct{}
 
 // yzy:[Get:adminPath]
-func (c AdminController) Tasks(ctx *fiber.Ctx) error {
-	ctx.SendStatus(fiber.StatusOK)
-	return nil
+func (c AdminController) Admin(ctx *fiber.Ctx) error {
+	return ctx.SendStatus(fiber.StatusOK)
+}
+
+// yzy:[Get:profilePath]
+func (c AdminController) Profile(ctx *fiber.Ctx) error {
+	return ctx.SendStatus(fiber.StatusOK)
 }

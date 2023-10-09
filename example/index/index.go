@@ -6,8 +6,8 @@ import (
 
 type IndexController struct{}
 
+// yzy:[@pong]
 // yzy:[Get:"/index"]
 func (c IndexController) Index(ctx *fiber.Ctx) error {
-	ctx.SendStatus(fiber.StatusOK)
-	return nil
+	return ctx.SendStatus(fiber.StatusOK)
 }

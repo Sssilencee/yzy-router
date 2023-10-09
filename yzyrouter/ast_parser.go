@@ -3,6 +3,7 @@ package yzyrouter
 import (
 	"fmt"
 	"go/ast"
+	"go/doc"
 	"go/parser"
 	"go/token"
 	"strings"
@@ -12,7 +13,6 @@ type astPackage struct {
 	*ast.Package
 	set    *token.FileSet
 	routes map[string]string
-	mode   parserMode
 }
 
 type preamble struct {
@@ -20,9 +20,10 @@ type preamble struct {
 	method         string
 	fn             string
 	controllerName string
+	middlewares    []string
 }
 
-func pkgAst(path string, mode parserMode) (astPackage, error) {
+func pkgAst(path string) (astPackage, error) {
 	set := token.NewFileSet()
 	pkg, err := parser.ParseDir(set, path, nil, parser.ParseComments)
 	if err != nil {
@@ -35,45 +36,90 @@ func pkgAst(path string, mode parserMode) (astPackage, error) {
 	return astPackage{
 		Package: p,
 		set:     set,
-		mode:    mode,
 	}, nil // only one pkg in this dir
 }
 
-func (ap astPackage) parsePreambles() []preamble {
-	prs := make([]preamble, 0)
+func (ap astPackage) parsePreambles() ([]preamble, error) {
+	// `if len(preamble) < 8` because: yzy:[@_] - 8 symbols
 
+	prs := make([]preamble, 0)
 	for _, f := range ap.Files {
 		for _, d := range f.Decls {
 			if fn, isFn := d.(*ast.FuncDecl); isFn {
 
 				preamble := fn.Doc.Text()
-				if preamble == "" {
+				if len(preamble) < 8 {
 					continue
 				}
+
+				middlewares := make([]string, 0)
 				controllerName := fn.Recv.List[0].Type.(*ast.Ident).Name
+				preambles := strings.Split(preamble, "\n")
+				for _, p := range preambles {
+					if len(p) < 8 || p[:4] != "yzy:" {
+						break
+					}
 
-				if p := strings.Split(preamble, "["); p[0] == "yzy:" {
-					pr := ap.parsePreamble(p[1])
-					pr.fn = fn.Name.String()
-					pr.controllerName = controllerName
+					if p[5] == '@' {
+						middlewares = append(middlewares, p[6:len(p)-1])
+					} else {
+						pr, err := ap.parsePreamble(p[5:])
+						if err != nil {
+							return nil, err
+						}
+						pr.fn = fn.Name.String()
+						pr.controllerName = controllerName
+						pr.middlewares = middlewares
 
-					prs = append(prs, pr)
+						prs = append(prs, pr)
+					}
 				}
 			}
 		}
 	}
 
-	return prs
+	mws := make(map[string][]string, 0)
+	pkg := doc.New(ap.Package, "./", doc.AllMethods)
+	for _, t := range pkg.Types {
+		if len(t.Doc) < 8 {
+			continue
+		}
+
+		preambles := strings.Split(t.Doc, "\n")
+		for _, p := range preambles {
+			if len(p) < 8 || p[:4] != "yzy:" || p[5] != '@' {
+				continue
+			}
+
+			_, exist := mws[t.Name]
+			if !exist {
+				mws[t.Name] = make([]string, 0, 1)
+			}
+			mws[t.Name] = append(mws[t.Name], p[6:len(p)-1])
+		}
+	}
+
+	for i, p := range prs {
+		m, exist := mws[p.controllerName]
+		if exist {
+			prs[i].middlewares = append(p.middlewares, m...)
+		}
+	}
+
+	return prs, nil
 }
 
-func (ap astPackage) parsePreamble(pr string) preamble {
+func (ap astPackage) parsePreamble(pr string) (preamble, error) {
 	params := strings.Split(pr, ":")
-	route := strings.TrimRight(params[1], "]\n") // ignore last `]`
+	route := strings.TrimRight(params[1], "]") // ignore last `]`
 
 	if string(route[0]) != "\"" || string(route[len(route)-1]) != "\"" {
 		// Initialize map when meet first variable route
 		if ap.routes == nil {
-			routes := ap.parsePathVars()
+			routes, err := ap.parsePathVars()
+			if err != nil {
+				return preamble{}, err
+			}
 			ap.routes = routes
 		}
 		route = ap.routes[route]
@@ -83,10 +129,10 @@ func (ap astPackage) parsePreamble(pr string) preamble {
 	return preamble{
 		route:  route,
 		method: strings.Title(strings.ToLower(params[0])), // method name before `:`
-	}
+	}, nil
 }
 
-func (ap astPackage) parsePathVars() map[string]string {
+func (ap astPackage) parsePathVars() (map[string]string, error) {
 	routes := make(map[string]string)
 
 	for _, f := range ap.Files {
@@ -96,8 +142,8 @@ func (ap astPackage) parsePathVars() map[string]string {
 					for _, s := range gen.Specs {
 						if v, isV := s.(*ast.ValueSpec); isV {
 							val, err := ap.parseAstExpr(v.Values[0])
-							if err != nil && ap.mode == Debug {
-								fmt.Println(err)
+							if err != nil {
+								return nil, fmt.Errorf("ast parsing error: %v", err)
 							}
 							routes[v.Names[0].String()] = val
 						}
@@ -107,7 +153,7 @@ func (ap astPackage) parsePathVars() map[string]string {
 		}
 	}
 
-	return routes
+	return routes, nil
 }
 
 func (ap astPackage) parseAstExpr(expr ast.Expr) (string, error) {

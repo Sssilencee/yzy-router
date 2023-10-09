@@ -17,18 +17,15 @@ type TaskController struct{}
 
 // yzy:[Get:addTaskPath]
 func (c TaskController) AddTask(ctx *fiber.Ctx) error {
-	ctx.SendStatus(fiber.StatusOK)
-	return nil
+	return ctx.SendStatus(fiber.StatusOK)
 }
 
 // yzy:[Get:deleteTaskPath]
 func (c TaskController) DeleteTask(ctx *fiber.Ctx) error {
-	ctx.SendStatus(fiber.StatusOK)
-	return nil
+	return ctx.SendStatus(fiber.StatusOK)
 }
 
 // yzy:[Get:deleteAllTasksPath]
 func (c TaskController) DeleteAllTasks(ctx *fiber.Ctx) error {
-	ctx.SendStatus(fiber.StatusOK)
-	return nil
+	return ctx.SendStatus(fiber.StatusOK)
 }
